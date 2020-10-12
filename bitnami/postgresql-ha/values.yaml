@@ -29,7 +29,7 @@
 postgresqlImage:
   registry: docker.io
   repository: bitnami/postgresql-repmgr
-  tag: 11.9.0-debian-10-r30
+  tag: 11.9.0-debian-10-r54
   ## Specify a imagePullPolicy. Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
@@ -51,7 +51,7 @@ postgresqlImage:
 pgpoolImage:
   registry: docker.io
   repository: bitnami/pgpool
-  tag: 4.1.4-debian-10-r7
+  tag: 4.1.4-debian-10-r24
   ## Specify a imagePullPolicy. Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
@@ -90,7 +90,7 @@ volumePermissionsImage:
 metricsImage:
   registry: docker.io
   repository: bitnami/postgres-exporter
-  tag: 0.8.0-debian-10-r221
+  tag: 0.8.0-debian-10-r242
   ## Specify a imagePullPolicy. Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
@@ -117,6 +117,14 @@ metricsImage:
 ## Kubernetes Cluster Domain
 ##
 clusterDomain: cluster.local
+
+## Common annotations to add to all resources (sub-charts are not considered). Evaluated as a template
+##
+commonAnnotations: {}
+
+## Common labels to add to all resources (sub-charts are not considered). Evaluated as a template
+##
+commonLabels: {}
 
 ## PostgreSQL parameters
 ##
@@ -176,6 +184,57 @@ postgresql:
   containerSecurityContext:
     enabled: true
     runAsUser: 1001
+
+  ## Custom Liveness probe
+  ##
+  customLivenessProbe: {}
+
+  ## Custom Readiness probe
+  ##
+  customReadinessProbe: {}
+
+  ## Container command (using container default if not set)
+  ##
+  command:
+
+  ## Container args (using container default if ot set)
+  ##
+  args:
+
+  ## lifecycleHooks for the container to automate configuration before or after startup.
+  ##
+  lifecycleHooks:
+
+  ## An array to add extra env vars
+  ## For example:
+  ##
+  extraEnvVars: []
+  #  - name: BEARER_AUTH
+  #    value: true
+
+  ## ConfigMap with extra environment variables
+  ##
+  extraEnvVarsCM:
+
+  ## Secret with extra environment variables
+  ##
+  extraEnvVarsSecret:
+
+  ## Extra volumes to add to the deployment
+  ##
+  extraVolumes: []
+
+  ## Extra volume mounts to add to the container
+  ##
+  extraVolumeMounts: []
+
+  ## Extra init containers to add to the deployment
+  ##
+  initContainers: []
+
+  ## Extra sidecar containers to add to the deployment
+  ##
+  sidecars: []
 
   ## PostgreSQL containers' resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
@@ -257,6 +316,16 @@ postgresql:
   repmgrReconnectAttempts: 3
   repmgrReconnectInterval: 5
 
+  ## Extra init containers
+  ## Example
+  ##
+  ## extraInitContainers:
+  ##   - name: do-something
+  ##     image: busybox
+  ##     command: ['do', 'something']
+  ##
+  extraInitContainers: []
+
   ## Repmgr configuration
   ## Specify content for repmgr.conf
   ## Default: do not create repmgr.conf
@@ -264,7 +333,6 @@ postgresql:
   ## ref: https://github.com/bitnami/bitnami-docker-postgresql-repmgr#configuration-file
   ##
   # repmgrConfiguration: |-
-
   ## PostgreSQL configuration
   ## Specify runtime configuration parameters as a dict, using camelCase, e.g.
   ## {"sharedBuffers": "500MB"}
@@ -272,7 +340,6 @@ postgresql:
   ## ref: https://github.com/bitnami/bitnami-docker-postgresql-repmgr#configuration-file
   ##
   # configuration:
-
   ## PostgreSQL client authentication configuration
   ## Specify content for pg_hba.conf
   ## Default: do not create pg_hba.conf
@@ -283,24 +350,20 @@ postgresql:
   #   local all all trust
   #   host all all localhost trust
   #   host mydatabase mysuser 192.168.0.0/24 md5
-
   ## ConfigMap with PostgreSQL configuration
   ## NOTE: This will override repmgrConfiguration, configuration and pgHbaConfiguration
   ##
   # configurationCM:
-
   ## PostgreSQL extended configuration
   ## As above, but _appended_ to the main configuration
   ## Alternatively, you can put your *.conf under the files/conf.d/ directory
   ## ref: https://github.com/bitnami/bitnami-docker-postgresql-repmgr#allow-settings-to-be-loaded-from-files-other-than-the-default-postgresqlconf
   ##
   # extendedConf:
-
   ## ConfigMap with PostgreSQL extended configuration
   ## NOTE: This will override extendedConf
   ##
   # extendedConfCM:
-
   ## initdb scripts
   ## Specify dictionary of scripts to be run at first boot
   ## Alternatively, you can put your scripts under the files/docker-entrypoint-initdb.d directory
@@ -309,12 +372,10 @@ postgresql:
   #   my_init_script.sh: |
   #      #!/bin/sh
   #      echo "Do something."
-
   ## ConfigMap with scripts to be run at first boot
   ## NOTE: This will override initdbScripts
   ##
   # initdbScriptsCM:
-
   ## Secret with scripts to be run at first boot
   ## Note: can be used with initdbScriptsCM or initdbScripts
   ##
@@ -323,7 +384,6 @@ postgresql:
 ## Pgpool parameters
 ##
 pgpool:
-
   ## Additional users that will be performing connections to the database using
   ## pgpool. Use this property in order to create new user/password entries that
   ## will be appended to the "pgpool_passwd" file
@@ -352,6 +412,57 @@ pgpool:
   ## Labels to add to the pods. Evaluated as template
   ##
   podLabels: {}
+
+  ## Custom Liveness probe
+  ##
+  customLivenessProbe: {}
+
+  ## Custom Readiness probe
+  ##
+  customReadinessProbe: {}
+
+  ## Container command (using container default if not set)
+  ##
+  command:
+
+  ## Container args (using container default if ot set)
+  ##
+  args:
+
+  ## lifecycleHooks for the container to automate configuration before or after startup.
+  ##
+  lifecycleHooks:
+
+  ## An array to add extra env vars
+  ## For example:
+  ##
+  extraEnvVars: []
+  #  - name: BEARER_AUTH
+  #    value: true
+
+  ## ConfigMap with extra environment variables
+  ##
+  extraEnvVarsCM:
+
+  ## Secret with extra environment variables
+  ##
+  extraEnvVarsSecret:
+
+  ## Extra volumes to add to the deployment
+  ##
+  extraVolumes: []
+
+  ## Extra volume mounts to add to the container
+  ##
+  extraVolumeMounts: []
+
+  ## Extra init containers to add to the deployment
+  ##
+  initContainers: []
+
+  ## Extra sidecar containers to add to the deployment
+  ##
+  sidecars: []
 
   ## Number of replicas to deploy
   ##
@@ -510,15 +621,15 @@ pgpool:
     ##
     ## Name of the Secret that contains the certificates
     ##
-    certificatesSecret: ''
+    certificatesSecret: ""
     ##
     ## Certificate filename
     ##
-    certFilename: ''
+    certFilename: ""
     ##
     ## Certificate Key filename
     ##
-    certKeyFilename: ''
+    certKeyFilename: ""
     ##
     ## CA Certificate filename
     ## If provided, PgPool will authenticate TLS/SSL clients by requesting them a certificate
@@ -718,3 +829,7 @@ networkPolicy:
   ## (with the correct destination port).
   ##
   allowExternal: true
+
+## Array with extra yaml to deploy with the chart. Evaluated as a template
+##
+extraDeploy: []
