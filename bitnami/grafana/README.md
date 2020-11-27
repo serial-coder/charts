@@ -18,7 +18,7 @@ Bitnami charts can be used with [Kubeapps](https://kubeapps.com/) for deployment
 ## Prerequisites
 
 - Kubernetes 1.12+
-- Helm 2.12+ or Helm 3.0-beta3+
+- Helm 3.0-beta3+
 - PV provisioner support in the underlying infrastructure
 - ReadWriteMany volumes for deployment scaling
 
@@ -100,27 +100,32 @@ The following tables lists the configurable parameters of the grafana chart and 
 
 ### Deployment parameters
 
-| Parameter                      | Description                                              | Default                        |
-|--------------------------------|----------------------------------------------------------|--------------------------------|
-| `replicaCount`                 | Number of Grafana nodes                                  | `1`                            |
-| `updateStrategy`               | Update strategy for the deployment                       | `{type: "RollingUpdate"}`      |
-| `schedulerName`                | Alternative scheduler                                    | `nil`                          |
-| `podLabels`                    | Grafana pod labels                                       | `{}` (evaluated as a template) |
-| `podAnnotations`               | Grafana Pod annotations                                  | `{}` (evaluated as a template) |
-| `affinity`                     | Affinity for pod assignment                              | `{}` (evaluated as a template) |
-| `nodeSelector`                 | Node labels for pod assignment                           | `{}` (evaluated as a template) |
-| `tolerations`                  | Tolerations for pod assignment                           | `[]` (evaluated as a template) |
-| `livenessProbe`                | Liveness probe configuration for Grafana                 | `Check values.yaml file`       |
-| `readinessProbe`               | Readiness probe configuration for Grafana                | `Check values.yaml file`       |
-| `securityContext.enabled`      | Enable securityContext on for Grafana deployment         | `true`                         |
-| `securityContext.runAsUser`    | User for the security context                            | `1001`                         |
-| `securityContext.fsGroup`      | Group to configure permissions for volumes               | `1001`                         |
-| `securityContext.runAsNonRoot` | Run containers as non-root users                         | `true`                         |
-| `resources.limits`             | The resources limits for Grafana containers              | `{}`                           |
-| `resources.requests`           | The requested resources for Grafana containers           | `{}`                           |
-| `sidecars`                     | Attach additional sidecar containers to the Grafana pod  | `{}`                           |
-| `extraVolumes`                 | Additional volumes for the Grafana pod                   | `[]`                           |
-| `extraVolumeMounts`            | Additional volume mounts for the Grafana container       | `[]`                           |
+| Parameter                      | Description                                                                                | Default                        |
+|--------------------------------|--------------------------------------------------------------------------------------------|--------------------------------|
+| `replicaCount`                 | Number of Grafana nodes                                                                    | `1`                            |
+| `updateStrategy`               | Update strategy for the deployment                                                         | `{type: "RollingUpdate"}`      |
+| `schedulerName`                | Alternative scheduler                                                                      | `nil`                          |
+| `podLabels`                    | Grafana pod labels                                                                         | `{}` (evaluated as a template) |
+| `podAnnotations`               | Grafana Pod annotations                                                                    | `{}` (evaluated as a template) |
+| `podAffinityPreset`            | Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`        | `""`                           |
+| `podAntiAffinityPreset`        | Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`   | `soft`                         |
+| `nodeAffinityPreset.type`      | Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`  | `""`                           |
+| `nodeAffinityPreset.key`       | Node label key to match Ignored if `affinity` is set.                                      | `""`                           |
+| `nodeAffinityPreset.values`    | Node label values to match. Ignored if `affinity` is set.                                  | `[]`                           |
+| `affinity`                     | Affinity for pod assignment                                                                | `{}` (evaluated as a template) |
+| `nodeSelector`                 | Node labels for pod assignment                                                             | `{}` (evaluated as a template) |
+| `tolerations`                  | Tolerations for pod assignment                                                             | `[]` (evaluated as a template) |
+| `livenessProbe`                | Liveness probe configuration for Grafana                                                   | `Check values.yaml file`       |
+| `readinessProbe`               | Readiness probe configuration for Grafana                                                  | `Check values.yaml file`       |
+| `securityContext.enabled`      | Enable securityContext on for Grafana deployment                                           | `true`                         |
+| `securityContext.runAsUser`    | User for the security context                                                              | `1001`                         |
+| `securityContext.fsGroup`      | Group to configure permissions for volumes                                                 | `1001`                         |
+| `securityContext.runAsNonRoot` | Run containers as non-root users                                                           | `true`                         |
+| `resources.limits`             | The resources limits for Grafana containers                                                | `{}`                           |
+| `resources.requests`           | The requested resources for Grafana containers                                             | `{}`                           |
+| `sidecars`                     | Attach additional sidecar containers to the Grafana pod                                    | `{}`                           |
+| `extraVolumes`                 | Additional volumes for the Grafana pod                                                     | `[]`                           |
+| `extraVolumeMounts`            | Additional volume mounts for the Grafana container                                         | `[]`                           |
 
 ### Persistence parameters
 
@@ -367,6 +372,12 @@ To configure the external database provide a configuration file containing the [
 
 More information about Grafana HA [here](https://grafana.com/docs/tutorials/ha_setup/)
 
+### Setting Pod's affinity
+
+This chart allows you to set your custom affinity using the `affinity` paremeter. Find more infomation about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
+
+As an alternative, you can use of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [bitnami/common](https://github.com/bitnami/charts/tree/master/bitnami/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
+
 ## Persistence
 
 The [Bitnami Grafana](https://github.com/bitnami/bitnami-docker-grafana) image stores the Grafana data and configurations at the `/opt/bitnami/grafana/data` path of the container.
@@ -379,6 +390,31 @@ See the [Parameters](#parameters) section to configure the PVC or to disable per
 Find more information about how to deal with common errors related to Bitnami’s Helm charts in [this troubleshooting guide](https://docs.bitnami.com/general/how-to/troubleshoot-helm-chart-issues).
 
 ## Upgrading
+
+### To 4.1.0
+
+This version also introduces `bitnami/common`, a [library chart](https://helm.sh/docs/topics/library_charts/#helm) as a dependency. More documentation about this new utility could be found [here](https://github.com/bitnami/charts/tree/master/bitnami/common#bitnami-common-library-chart). Please, make sure that you have updated the chart dependencies before executing any upgrade.
+
+### To 4.0.0
+
+[On November 13, 2020, Helm v2 support was formally finished](https://github.com/helm/charts#status-of-the-project), this major version is the result of the required changes applied to the Helm Chart to be able to incorporate the different features added in Helm v3 and to be consistent with the Helm project itself regarding the Helm v2 EOL.
+
+**What changes were introduced in this major version?**
+
+- Previous versions of this Helm Chart use `apiVersion: v1` (installable by both Helm 2 and 3), this Helm Chart was updated to `apiVersion: v2` (installable by Helm 3 only). [Here](https://helm.sh/docs/topics/charts/#the-apiversion-field) you can find more information about the `apiVersion` field.
+- The different fields present in the *Chart.yaml* file has been ordered alphabetically in a homogeneous way for all the Bitnami Helm Charts
+
+**Considerations when upgrading to this version**
+
+- If you want to upgrade to this version from a previous one installed with Helm v3, you shouldn't face any issues
+- If you want to upgrade to this version using Helm v2, this scenario is not supported as this version doesn't support Helm v2 anymore
+- If you installed the previous version with Helm v2 and wants to upgrade to this version with Helm v3, please refer to the [official Helm documentation](https://helm.sh/docs/topics/v2_v3_migration/#migration-use-cases) about migrating from Helm v2 to v3
+
+**Useful links**
+
+- https://docs.bitnami.com/tutorials/resolve-helm2-helm3-post-migration-issues/
+- https://helm.sh/docs/topics/v2_v3_migration/
+- https://helm.sh/blog/migrate-from-helm-v2-to-helm-v3/
 
 ### To 3.0.0
 

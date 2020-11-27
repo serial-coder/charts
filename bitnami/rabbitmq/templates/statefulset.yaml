@@ -4,6 +4,9 @@ metadata:
   name: {{ include "rabbitmq.fullname" . }}
   namespace: {{ .Release.Namespace | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.statefulsetLabels }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.statefulsetLabels "context" $) | nindent 4 }}
+    {{- end }}
 spec:
   serviceName: {{ template "rabbitmq.fullname" . }}-headless
   podManagementPolicy: {{ .Values.podManagementPolicy }}
@@ -22,6 +25,7 @@ spec:
         {{- include "common.tplvalues.render" (dict "value" .Values.podLabels "context" $) | nindent 8 }}
         {{- end }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configuration.yaml") . | sha256sum }}
         {{- if or (not .Values.auth.existingErlangSecret) (not .Values.auth.existingPasswordSecret) }}
         checksum/secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
         {{- end }}
@@ -52,7 +56,7 @@ spec:
       {{- if .Values.podSecurityContext }}
       securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- end }}
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- if or (.Values.initContainers) (and .Values.volumePermissions.enabled .Values.persistence.enabled .Values.podSecurityContext) }}
       initContainers:
         {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled .Values.podSecurityContext }}
@@ -248,9 +252,14 @@ spec:
             preStop:
               exec:
                 command:
-                  - bash
+                  - /bin/bash
                   - -ec
-                  - rabbitmqctl stop_app
+                  - |
+                    if [[ -f /opt/bitnami/scripts/rabbitmq/nodeshutdown.sh ]]; then
+                        /opt/bitnami/scripts/rabbitmq/nodeshutdown.sh -t {{ .Values.terminationGracePeriodSeconds | quote }} -d  {{ ternary "true" "false" .Values.image.debug | quote }}
+                    else
+                        rabbitmq stop_app
+                    fi
           volumeMounts:
             - name: configuration
               mountPath: /bitnami/rabbitmq/conf
