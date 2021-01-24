@@ -47,6 +47,13 @@ Return the proper Kafka image name
 {{- end -}}
 
 {{/*
+Return the proper Kafka provisioning image name
+*/}}
+{{- define "kafka.provisioning.image" -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.provisioning.image "global" .Values.global) }}
+{{- end -}}
+
+{{/*
 Return the proper image name (for the init container auto-discovery image)
 */}}
 {{- define "kafka.externalAccess.autoDiscovery.image" -}}
@@ -325,7 +332,7 @@ kafka: .Values.externalAccess.service.nodePorts
 {{- define "kafka.validateValues.externalAccessServiceType" -}}
 {{- if and (not (eq .Values.externalAccess.service.type "NodePort")) (not (eq .Values.externalAccess.service.type "LoadBalancer")) -}}
 kafka: externalAccess.service.type
-    Available servive type for external access are NodePort or LoadBalancer.
+    Available service type for external access are NodePort or LoadBalancer.
 {{- end -}}
 {{- end -}}
 

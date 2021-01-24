@@ -14,7 +14,7 @@
 image:
   registry: docker.io
   repository: bitnami/node
-  tag: 14.15.1-debian-10-r8
+  tag: 14.15.4-debian-10-r0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -26,6 +26,10 @@ image:
   ##
   # pullSecrets:
   #   - myRegistryKeySecretName
+
+## Force target Kubernetes version (using Helm capabilites if not set)
+##
+kubeVersion:
 
 ## String to partially override node.fullname template (will maintain the release name)
 ##
@@ -76,7 +80,7 @@ git:
   image:
     registry: docker.io
     repository: bitnami/git
-    tag: 2.29.2-debian-10-r26
+    tag: 2.30.0-debian-10-r7
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -113,7 +117,7 @@ applicationPort: 3000
 ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
 ## Allowed values: soft, hard
 ##
-podAffinityPreset: ""
+podAffinityPreset: ''
 
 ## Pod anti-affinity preset
 ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
@@ -128,12 +132,13 @@ podAntiAffinityPreset: soft
 nodeAffinityPreset:
   ## Node affinity type
   ## Allowed values: soft, hard
-  type: ""
+  ##
+  type: ''
   ## Node label key to match
   ## E.g.
   ## key: "kubernetes.io/e2e-az-name"
   ##
-  key: ""
+  key: ''
   ## Node label values to match
   ## E.g.
   ## values:
@@ -181,9 +186,10 @@ extraDeploy: []
 
 ## Configure extra options for liveness and readiness probes
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+##
 livenessProbe:
   enabled: true
-  path: "/"
+  path: '/'
   initialDelaySeconds: 60
   periodSeconds: 10
   timeoutSeconds: 5
@@ -191,7 +197,7 @@ livenessProbe:
   successThreshold: 1
 readinessProbe:
   enabled: true
-  path: "/"
+  path: '/'
   initialDelaySeconds: 10
   periodSeconds: 5
   timeoutSeconds: 3
@@ -311,7 +317,7 @@ persistence:
   accessMode: ReadWriteOnce
   size: 1Gi
 
-## Service paramaters
+## Service parameters
 ##
 service:
   ## Service type
@@ -324,11 +330,13 @@ service:
   ## clusterIP: ""
   ## loadBalancerIP for the Node Service (optional, cloud specific)
   ## ref: http://kubernetes.io/docs/user-guide/services/#type-loadbalancer
+  ##
 
   ## Control where client requests go, to the same pod or round-robin
   ## Values: ClientIP or None
   ## ref: https://kubernetes.io/docs/user-guide/services/
-  sessionAffinity: "None"
+  ##
+  sessionAffinity: 'None'
 
   ## Specify the nodePort value for the LoadBalancer and NodePort service types.
   ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
@@ -342,41 +350,80 @@ service:
   ## set the LoadBalancer service type to internal only.
   ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#internal-load-balancer
   ##
+  # loadBalancerSourceRanges:
+  ## In order to limit which client IP's can access the Network Load Balancer, specify loadBalancerSourceRanges.
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#aws-nlb-support
+  ##
   annotations: {}
 
-## Ingress paramaters
+## Configure the ingress resource that allows you to access the
+## Node.js installation. Set up the URL
+## ref: http://kubernetes.io/docs/user-guide/ingress/
 ##
 ingress:
   ## Set to true to enable ingress record generation
   ##
   enabled: false
 
-  ## The list of hostnames to be covered with this ingress record.
-  ## Most likely this will be just one host, but in the event more hosts are needed, this is an array
-  hosts:
-    - name: node.local
+  ## Set this to true in order to add the corresponding annotations for cert-manager
+  ##
+  certManager: false
 
-      ## Set this to true in order to enable TLS on the ingress record
-      ##
-      tls: false
+  ## Ingress Path type
+  ##
+  pathType: ImplementationSpecific
 
-      ## Set this to true in order to add the corresponding annotations for cert-manager
-      ##
-      certManager: false
+  ## Override API Version (automatically detected if not set)
+  ##
+  apiVersion:
 
-      ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
-      ##
-      tlsSecret: node.local-tls
+  ## When the ingress is enabled, a host pointing to this will be created
+  ##
+  hostname: node.local
 
-      ## Ingress annotations done as key:value pairs
-      ## For a full list of possible ingress annotations, please see
-      ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
-      ##
-      ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
-      annotations:
-      #  kubernetes.io/ingress.class: nginx
+  ## The Path to Node.js. You may need to set this to '/*' in order to use this
+  ## with ALB ingress controllers.
+  ##
+  path: /
 
-  secrets:
+  ## Ingress annotations done as key:value pairs
+  ## For a full list of possible ingress annotations, please see
+  ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
+  ##
+  ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
+  ##
+  annotations: {}
+
+  ## Enable TLS configuration for the hostname defined at ingress.hostname parameter
+  ## TLS certificates will be retrieved from a TLS secret with name: {{- printf "%s-tls" .Values.ingress.hostname }}
+  ## You can use the ingress.secrets parameter to create this TLS secret or relay on cert-manager to create it
+  ##
+  tls: false
+
+  ## The list of additional hostnames to be covered with this ingress record.
+  ## Most likely the hostname above will be enough, but in the event more hosts are needed, this is an array
+  ## extraHosts:
+  ## - name: node.local
+  ##   path: /
+  ##
+
+  ## Any additional arbitrary paths that may need to be added to the ingress under the main host.
+  ## For example: The ALB ingress controller requires a special rule for handling SSL redirection.
+  ## extraPaths:
+  ## - path: /*
+  ##   backend:
+  ##     serviceName: ssl-redirect
+  ##     servicePort: use-annotation
+  ##
+
+  ## The tls configuration for additional hostnames to be covered with this ingress record.
+  ## see: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+  ## extraTls:
+  ## - hosts:
+  ##     - node.local
+  ##   secretName: node.local-tls
+  ##
+
   ## If you're providing your own certificates, please use this to add the certificates as secrets
   ## key and certificate should start with -----BEGIN CERTIFICATE----- or
   ## -----BEGIN RSA PRIVATE KEY-----
@@ -386,9 +433,12 @@ ingress:
   ##
   ## It is also possible to create and manage the certificates outside of this helm chart
   ## Please see README.md for more information
-  # - name: node.local-tls
-  #   key:
-  #   certificate:
+  ##
+  secrets: []
+  ## - name: node.local-tls
+  ##   key:
+  ##   certificate:
+  ##
 
 ##
 ## MongoDB chart configuration
@@ -411,7 +461,7 @@ mongodb:
     ## MongoDB root password
     ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
     ##
-    rootPassword: ""
+    rootPassword: ''
 
     ## MongoDB custom user and database
     ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run

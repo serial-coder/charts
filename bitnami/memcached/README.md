@@ -18,7 +18,7 @@ Bitnami charts can be used with [Kubeapps](https://kubeapps.com/) for deployment
 ## Prerequisites
 
 - Kubernetes 1.12+
-- Helm 3.0-beta3+
+- Helm 3.1.0
 
 ## Installing the Chart
 
@@ -59,7 +59,7 @@ The following tables lists the configurable parameters of the Memcached chart an
 | `nameOverride`                           | String to partially override common.names.fullname template with a string                              | `nil`                                                        |
 | `fullnameOverride`                       | String to fully override common.names.fullname template with a string                                  | `nil`                                                        |
 | `clusterDomain`                          | Kubernetes cluster domain                                                                              | `cluster.local`                                              |
-| `architecture`                           | Memcahed architecture. Allowed values: standalone or high-availability                                 | `standalone`                                                 |
+| `architecture`                           | Memcached architecture. Allowed values: standalone or high-availability                                 | `standalone`                                                 |
 | `replicaCount`                           | Number of containers                                                                                   | `1`                                                          |
 | `extraEnv`                               | Additional env vars to pass                                                                            | `{}`                                                         |
 | `arguments`                              | Arguments to pass                                                                                      | `["/run.sh"]`                                                |
@@ -129,24 +129,6 @@ It is strongly recommended to use immutable tags in a production environment. Th
 
 Bitnami will release a new chart updating its containers if a new version of the main container, significant changes, or critical vulnerabilities exist.
 
-### Production configuration
-
-This chart includes a `values-production.yaml` file where you can find some parameters oriented to production configuration in comparison to the regular `values.yaml`. You can use this file instead of the default one.
-
-- Start a side-car prometheus exporter:
-
-```diff
-- metrics.enabled: false
-+ metrics.enabled: true
-```
-
-- Enable read-only filesystem:
-
-```diff
-- securityContext.readOnlyRootFilesystem=false
-+ securityContext.readOnlyRootFilesystem=true
-```
-
 ## Persistence
 
 When using `architecture: "high-availability"` the [Bitnami Memcached](https://github.com/bitnami/bitnami-docker-memcached) image stores the cache-state at the `/cache-state` path of the container if enabled.
@@ -156,7 +138,7 @@ See the [Parameters](#parameters) section to configure the PVC or to disable per
 
 ### Setting Pod's affinity
 
-This chart allows you to set your custom affinity using the `affinity` paremeter. Find more infomation about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
+This chart allows you to set your custom affinity using the `affinity` parameter. Find more information about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
 
 As an alternative, you can use of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [bitnami/common](https://github.com/bitnami/charts/tree/master/bitnami/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
 

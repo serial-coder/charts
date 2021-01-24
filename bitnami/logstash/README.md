@@ -18,7 +18,7 @@ Bitnami charts can be used with [Kubeapps](https://kubeapps.com/) for deployment
 ## Prerequisites
 
 - Kubernetes 1.12+
-- Helm 3.0-beta3+
+- Helm 3.1.0
 
 ## Installing the Chart
 
@@ -58,6 +58,7 @@ The following tables lists the configurable parameters of the Logstash chart and
 | `image.pullPolicy`                         | Logstash image pull policy                                                                                           | `IfNotPresent`                                          |
 | `image.pullSecrets`                        | Specify docker-registry secret names as an array                                                                     | `[]` (does not add image pull secrets to deployed pods) |
 | `image.debug`                              | Specify if debug logs should be enabled                                                                              | `false`                                                 |
+| `kubeVersion`                              | Force target Kubernetes version (using Helm capabilities if not set)                                                 | `nil`                                                   |
 | `nameOverride`                             | String to partially override logstash.fullname template with a string (will prepend the release name)                | `nil`                                                   |
 | `fullnameOverride`                         | String to fully override logstash.fullname template with a string                                                    | `nil`                                                   |
 | `clusterDomain`                            | Default Kubernetes cluster domain                                                                                    | `cluster.local`                                         |
@@ -101,11 +102,15 @@ The following tables lists the configurable parameters of the Logstash chart and
 | `service.clusterIP`                        | Static clusterIP or None for headless services                                                                       | `nil`                                                   |
 | `ingress.enabled`                          | Enable ingress controller resource                                                                                   | `false`                                                 |
 | `ingress.certManager`                      | Add annotations for cert-manager                                                                                     | `false`                                                 |
-| `ingress.annotations`                      | Ingress annotations                                                                                                  | `{}`                                                    |
-| `ingress.hosts[0].name`                    | Hostname for Logstash service                                                                                        | `logstash.local`                                        |
-| `ingress.hosts[0].path`                    | Path within the url structure                                                                                        | `/`                                                     |
-| `ingress.tls[0].hosts[0]`                  | TLS hosts                                                                                                            | `logstash.local`                                        |
-| `ingress.tls[0].secretName`                | TLS Secret (certificates)                                                                                            | `logstash.local-tls`                                    |
+| `ingress.hostname`                         | Default host for the ingress resource                                                                                | `logstash.local`                                        |
+| `ingress.path`                             | Default path for the ingress resource                                                                                | `/`                                                     |
+| `ingress.tls`                              | Create TLS Secret                                                                                                    | `false`                                                 |
+| `ingress.annotations`                      | Ingress annotations                                                                                                  | `[]` (evaluated as a template)                          |
+| `ingress.extraHosts[0].name`               | Additional hostnames to be covered                                                                                   | `nil`                                                   |
+| `ingress.extraHosts[0].path`               | Additional hostnames to be covered                                                                                   | `nil`                                                   |
+| `ingress.extraPaths`                       | Additional arbitrary path/backend objects                                                                            | `nil`                                                   |
+| `ingress.extraTls[0].hosts[0]`             | TLS configuration for additional hostnames to be covered                                                             | `nil`                                                   |
+| `ingress.extraTls[0].secretName`           | TLS configuration for additional hostnames to be covered                                                             | `nil`                                                   |
 | `ingress.secrets[0].name`                  | TLS Secret Name                                                                                                      | `nil`                                                   |
 | `ingress.secrets[0].certificate`           | TLS Secret Certificate                                                                                               | `nil`                                                   |
 | `ingress.secrets[0].key`                   | TLS Secret Key                                                                                                       | `nil`                                                   |
@@ -134,6 +139,7 @@ The following tables lists the configurable parameters of the Logstash chart and
 | `podDisruptionBudget.create`               | If true, create a pod disruption budget for pods.                                                                    | `false`                                                 |
 | `podDisruptionBudget.minAvailable`         | Minimum number / percentage of pods that should remain scheduled                                                     | `1`                                                     |
 | `podDisruptionBudget.maxUnavailable`       | Maximum number / percentage of pods that may be made unavailable                                                     | `nil`                                                   |
+| `extraDeploy`                              | Array of extra objects to deploy with the release (evaluated as a template).                                         | `nil`                                                   |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
@@ -160,24 +166,6 @@ It is strongly recommended to use immutable tags in a production environment. Th
 
 Bitnami will release a new chart updating its containers if a new version of the main container, significant changes, or critical vulnerabilities exist.
 
-### Production configuration
-
-This chart includes a `values-production.yaml` file where you can find some parameters oriented to production configuration in comparison to the regular `values.yaml`:
-
-- Increase the number of Logstash replicas:
-
-```diff
-- replicaCount: 1
-+ replicaCount: 3
-```
-
-- Enable Prometheus metrics:
-
-```diff
-- metrics.enabled: false
-+ metrics.enabled: true
-```
-
 ### Configure the way how to expose Logstash
 
 - **Ingress**: The ingress controller must be installed in the Kubernetes cluster. Set `ingress.enabled=true` to expose Logstash through Ingress.
@@ -191,9 +179,7 @@ By default, this Helm chart provides a very basic configuration for Logstash, wh
 
 You can achieve any Logstash configuration by providing your custom configuration files. To do so, this helm chart supports to customize every configuration file.
 
-Add your custom configuration files to "files/conf" in your working directory. These files will be mounted as a configMap to the containers and they will be used for configuring Logstash.
-
-Alternatively, you can specify the Logstash configuration using the `input`, `filter`, and `output` parameters. Each of them, allows you to specify the Input Plugins, Filter Plugins, and Output Plugins configuration, respectively.
+You can specify the Logstash configuration using the `input`, `filter`, and `output` parameters. Each of them, allows you to specify the Input Plugins, Filter Plugins, and Output Plugins configuration, respectively.
 
 In addition to these options, you can also set an external ConfigMap with all the configuration files. This is done by setting the `existingConfiguration` parameter. Note that this will override the two previous options.
 
@@ -207,10 +193,10 @@ You can also set an external ConfigMap with all the configuration files. This is
 
 Find below a basic example placing the configuration files in the "files/conf" folder although the same approach can be followed by using a ConfigMap:
 
-- Configuration files placed in `files/conf`:
+- ConfigMap with the configuration files:
 
 ```console
-$ cat files/conf/bye.conf
+$ cat bye.conf
 input {
   file {
     path => "/tmp/bye"
@@ -220,7 +206,7 @@ output {
   stdout { }
 }
 
-$ cat files/conf/hello.conf
+$ cat hello.conf
 input {
   file {
     path => "/tmp/hello"
@@ -230,17 +216,19 @@ output {
   stdout { }
 }
 
-$ cat files/conf/pipelines.yml
+$ cat pipelines.yml
 - pipeline.id: hello
   path.config: "/opt/bitnami/logstash/config/hello.conf"
 - pipeline.id: bye
   path.config: "/opt/bitnami/logstash/config/bye.conf"
+
+$ kubectl create cm multipleconfig --from-file=pipelines.yml --from-file=hello.conf --from-file=bye.conf
 ```
 
 - Deploy the Helm Chart with the `enableMultiplePipelines` parameter:
 
 ```console
-$ helm install logstash . --set enableMultiplePipelines=true
+$ helm install logstash . --set enableMultiplePipelines=true --set existingConfiguration=multipleconfig
 
 $ kubectl logs -f logstash-0
 logstash 12:57:43.51 INFO  ==> ** Starting Logstash setup **
@@ -292,7 +280,7 @@ extraEnvVars:
 
 ### Setting Pod's affinity
 
-This chart allows you to set your custom affinity using the `affinity` paremeter. Find more infomation about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
+This chart allows you to set your custom affinity using the `affinity` parameter. Find more information about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
 
 As an alternative, you can use of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [bitnami/common](https://github.com/bitnami/charts/tree/master/bitnami/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
 
@@ -301,6 +289,14 @@ As an alternative, you can use of the preset configurations for pod affinity, po
 Find more information about how to deal with common errors related to Bitnami’s Helm charts in [this troubleshooting guide](https://docs.bitnami.com/general/how-to/troubleshoot-helm-chart-issues).
 
 ## Upgrading
+
+### To 3.0.0
+
+This version standardizes the way of defining Ingress rules. When configuring a single hostname for the Ingress rule, set the `ingress.hostname` value. When defining more than one, set the `ingress.extraHosts` array. Apart from this case, no issues are expected to appear when upgrading.
+
+### To 2.0.0
+
+This version drops support of including files in the `files/` folder, as it was working only under certain circumstances and the chart already provides alternative mechanisms like the `input` , `output` and `filter`, the `existingConfiguration` or the `extraDeploy` values.
 
 ### To 1.2.0
 

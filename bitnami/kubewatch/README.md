@@ -16,7 +16,7 @@ This chart bootstraps a kubewatch deployment on a [Kubernetes](http://kubernetes
 ## Prerequisites
 
 - Kubernetes 1.12+
-- Helm 3.0-beta3+
+- Helm 3.1.0
 
 ## Installing the Chart
 
@@ -121,7 +121,7 @@ The following tables lists the configurable parameters of the Kubewatch chart an
 | `containerSecurityContext`            | Kubewatch containers' Security Context                                                     | Check `values.yaml` file                                |
 | `resources.limits`                    | The resources limits for the Kubewatch container                                           | `{}`                                                    |
 | `resources.requests`                  | The requested resources for the Kubewatch container                                        | `{}`                                                    |
-| `leavinessProbe`                      | Leaviness probe configuration for Kubewatch                                                | Check `values.yaml` file                                |
+| `livenessProbe`                       | Liveness probe configuration for Kubewatch                                                 | Check `values.yaml` file                                |
 | `readinessProbe`                      | Readiness probe configuration for Kubewatch                                                | Check `values.yaml` file                                |
 | `customLivenessProbe`                 | Override default liveness probe                                                            | `nil`                                                   |
 | `customReadinessProbe`                | Override default readiness probe                                                           | `nil`                                                   |
@@ -222,7 +222,7 @@ There are cases where you may want to deploy extra objects, such a ConfigMap con
 
 ### Setting Pod's affinity
 
-This chart allows you to set your custom affinity using the `affinity` paremeter. Find more infomation about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
+This chart allows you to set your custom affinity using the `affinity` parameter. Find more information about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
 
 As an alternative, you can use of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [bitnami/common](https://github.com/bitnami/charts/tree/master/bitnami/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
 

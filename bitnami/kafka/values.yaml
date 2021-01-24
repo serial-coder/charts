@@ -14,7 +14,7 @@
 image:
   registry: docker.io
   repository: bitnami/kafka
-  tag: 2.6.0-debian-10-r78
+  tag: 2.7.0-debian-10-r29
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -55,7 +55,7 @@ commonAnnotations: {}
 ## Kafka Configuration
 ## Specify content for server.properties
 ## NOTE: This will override any KAFKA_CFG_ environment variables (including those set by the chart)
-## The server.properties is auto-generated based on other parameters when this paremeter is not specified
+## The server.properties is auto-generated based on other parameters when this parameter is not specified
 ##
 ## Example:
 ## config: |-
@@ -348,6 +348,12 @@ interBrokerListenerName: INTERNAL
 ##
 replicaCount: 1
 
+## Minimal broker.id value
+## Brokers increment their ID starting at this minimal value.
+## E.g., with `minBrokerId=100` and 3 nodes, IDs will be 100, 101, 102 for brokers 0, 1, and 2, respectively.
+##
+minBrokerId: 0
+
 ## StrategyType, can be set to RollingUpdate or OnDelete by default.
 ## ref: https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/#updating-statefulsets
 ##
@@ -426,6 +432,7 @@ tolerations: []
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 ##
 podSecurityContext:
+  enabled: true
   fsGroup: 1001
   runAsUser: 1001
 
@@ -559,7 +566,7 @@ externalAccess:
     image:
       registry: docker.io
       repository: bitnami/kubectl
-      tag: 1.17.13-debian-10-r21
+      tag: 1.17.17-debian-10-r4
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -626,7 +633,7 @@ externalAccess:
     ##
     annotations: {}
 
-## Persistence paramaters
+## Persistence parameters
 ##
 persistence:
   enabled: true
@@ -652,6 +659,8 @@ persistence:
   ## PVC annotations
   ##
   annotations: {}
+  ## Mount point for persistence
+  mountPath: /bitnami/kafka
 
 ## Log Persistence parameters
 ##
@@ -681,13 +690,19 @@ logPersistence:
   ## PVC annotations
   ##
   annotations: {}
+  ## Mount path for persistent logs
+  mountPath: /opt/bitnami/kafka/logs
 
-## Init Container paramaters
+
+## Init Container parameters
 ## Change the owner and group of the persistent volume(s) mountpoint(s) to 'runAsUser:fsGroup' on each component
 ## values from the securityContext section of the component
 ##
 volumePermissions:
   enabled: false
+  ## The security context for the volumePermissions init container
+  securityContext:
+    runAsUser: 0
   ## Bitnami Minideb image
   ## ref: https://hub.docker.com/r/bitnami/minideb/tags/
   ##
@@ -744,6 +759,53 @@ rbac:
   ##
   create: false
 
+## Kafka provisioning
+##
+provisioning:
+  enabled: false
+
+  image:
+    registry: docker.io
+    repository: bitnami/kafka
+    tag: 2.7.0-debian-10-r10
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets (secrets must be manually created in the namespace)
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## Example:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
+    ## Set to true if you would like to see extra information on logs
+    ##
+    debug: false
+
+  resources:
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    limits: {}
+    #   cpu: 250m
+    #   memory: 1Gi
+    requests: {}
+    #   cpu: 250m
+    #   memory: 256Mi
+
+  topics: []
+  # - name: topic-name
+  #   partitions: 1
+  #   replicationFactor: 1
+  #   # https://kafka.apache.org/documentation/#topicconfigs
+  #   config:
+  #     max.message.bytes: 64000
+  #     flush.messages: 1
+
 ## Prometheus Exporters / Metrics
 ##
 metrics:
@@ -758,7 +820,7 @@ metrics:
     image:
       registry: docker.io
       repository: bitnami/kafka-exporter
-      tag: 1.2.0-debian-10-r277
+      tag: 1.2.0-debian-10-r341
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -846,7 +908,7 @@ metrics:
     image:
       registry: docker.io
       repository: bitnami/jmx-exporter
-      tag: 0.14.0-debian-10-r64
+      tag: 0.14.0-debian-10-r128
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -996,3 +1058,7 @@ externalZookeeper:
   ## Server or list of external zookeeper servers to use.
   ##
   servers: []
+
+## Extra init containers to add to the deployment
+##
+initContainers: []

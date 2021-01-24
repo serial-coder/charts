@@ -61,7 +61,7 @@ serviceAccount:
 image:
   registry: docker.io
   repository: bitnami/kubernetes-event-exporter
-  tag: 0.9.0-debian-10-r9
+  tag: 0.9.0-debian-10-r37
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -114,6 +114,11 @@ resources:
 ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
 ##
 nodeSelector: {}
+
+## Set Priority Class Name to allow priority control over other pods
+## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+##
+priorityClassName: ""
 
 ## Tolerations for pod assignment
 ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/

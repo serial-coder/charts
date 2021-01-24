@@ -18,7 +18,7 @@ Bitnami charts can be used with [Kubeapps](https://kubeapps.com/) for deployment
 ## Prerequisites
 
 - Kubernetes 1.12+
-- Helm 3.0-beta3+
+- Helm 3.1.0
 - PV provisioner support in the underlying infrastructure
 
 ## Installing the Chart
@@ -107,6 +107,7 @@ The following tables lists the configurable parameters of the etcd chart and the
 | `service.annotations`                           | Annotations for etcd service                                                                                                                              | `{}`                                                        |
 | `service.loadBalancerIP`                        | loadBalancerIP if etcd service type is `LoadBalancer`                                                                                                     | `nil`                                                       |
 | `service.loadBalancerSourceRanges`              | loadBalancerSourceRanges if etcd service type is `LoadBalancer`                                                                                           | `nil`                                                       |
+| `service.externalIPs`                           | externalIPs for if etcd service                                                                                                                           | `nil`                                                       |
 | `persistence.enabled`                           | Enable persistence using PVC                                                                                                                              | `true`                                                      |
 | `persistence.storageClass`                      | PVC Storage Class for etcd volume                                                                                                                         | `nil`                                                       |
 | `persistence.accessMode`                        | PVC Access Mode for etcd volume                                                                                                                           | `ReadWriteOnce`                                             |
@@ -129,7 +130,9 @@ The following tables lists the configurable parameters of the etcd chart and the
 | `readinessProbe.timeoutSeconds`                 | When the probe times out                                                                                                                                  | `5`                                                         |
 | `readinessProbe.failureThreshold`               | Minimum consecutive failures for the probe to be considered failed after having succeeded.                                                                | `6`                                                         |
 | `readinessProbe.successThreshold`               | Minimum consecutive successes for the probe to be considered successful after having failed                                                               | `1`                                                         |
+| `statefulsetLabels`                             | Extra statefulset labels                                                                                                                                  | `{}` (evaluated as a template)                               |
 | `podAnnotations`                                | Annotations to be added to pods                                                                                                                           | `{}`                                                        |
+| `podLabels`                                     | Extra pod labels                                                                                                                                          | `{}` (evaluated as a template)                               |
 | `podAffinityPreset`                             | Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                                                       | `""`                                                        |
 | `podAntiAffinityPreset`                         | Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                                                  | `soft`                                                      |
 | `nodeAffinityPreset.type`                       | Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                                                 | `""`                                                        |
@@ -187,48 +190,6 @@ $ helm install my-release -f values.yaml bitnami/etcd
 It is strongly recommended to use immutable tags in a production environment. This ensures your deployment does not change automatically if the same tag is updated with a different image.
 
 Bitnami will release a new chart updating its containers if a new version of the main container, significant changes, or critical vulnerabilities exist.
-
-### Production configuration and horizontal scaling
-
-This chart includes a `values-production.yaml` file where you can find some parameters oriented to production configuration in comparison to the regular `values.yaml`. You can use this file instead of the default one.
-
-- Number of etcd nodes:
-```diff
-- statefulset.replicaCount: 1
-+ statefulset.replicaCount: 3
-```
-
-- Switch to encrypt client communication using TLS certificates:
-```diff
-- auth.client.secureTransport: false
-+ auth.client.secureTransport: true
-```
-
-- Switch to enable host authentication using TLS certificates:
-```diff
-- auth.client.enableAuthentication: false
-+ auth.client.enableAuthentication: true
-```
-
-- Switch to encrypt peer communication using TLS certificates:
-```diff
-- auth.peer.secureTransport: false
-+ auth.peer.secureTransport: true
-```
-
-- Switch to automatically create the TLS certificates:
-```diff
-- auth.peer.useAutoTLS: false
-+ auth.peer.useAutoTLS: true
-```
-
-- Enable prometheus to access etcd metrics endpoint:
-```diff
-- metrics.enabled: false
-+ metrics.enabled: true
-```
-
-To horizontally scale this chart once it has been deployed, you can upgrade the deployment using a new value for the `statefulset.replicaCount` parameter.
 
 ### Using custom configuration
 
@@ -300,11 +261,13 @@ disasterRecovery.pvc.size=2Gi
 disasterRecovery.pvc.storageClassName=nfs
 ```
 
+If `startFromSnapshot` is enabled at the same time than `disasterRecovery`, the PVC provided via `startFromSnapshot.existingClaim` will be used to store the periodical snapshots.
+
 > **Note**: Disaster recovery feature requires using volumes with ReadWriteMany access mode. For instance, you can use the stable/nfs-server-provisioner chart to provide NFS PVCs.
 
 ### Setting Pod's affinity
 
-This chart allows you to set your custom affinity using the `affinity` paremeter. Find more infomation about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
+This chart allows you to set your custom affinity using the `affinity` parameter. Find more information about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
 
 As an alternative, you can use of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [bitnami/common](https://github.com/bitnami/charts/tree/master/bitnami/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
 

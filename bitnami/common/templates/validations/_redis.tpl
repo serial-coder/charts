@@ -1,7 +1,7 @@
 
 {{/* vim: set filetype=mustache: */}}
 {{/*
-Validate Redis required passwords are not empty.
+Validate Redis(TM) required passwords are not empty.
 
 Usage:
 {{ include "common.validations.values.redis.passwords" (dict "secret" "secretName" "subchart" false "context" $) }}
@@ -30,12 +30,12 @@ Params:
 {{- end -}}
 
 {{/*
-Redis Auxiliar function to get the right value for existingSecret.
+Redis Auxiliary function to get the right value for existingSecret.
 
 Usage:
 {{ include "common.redis.values.existingSecret" (dict "context" $) }}
 Params:
-  - subchart - Boolean - Optional. Whether Redis is used as subchart or not. Default: false
+  - subchart - Boolean - Optional. Whether Redis(TM) is used as subchart or not. Default: false
 */}}
 {{- define "common.redis.values.existingSecret" -}}
   {{- if .subchart -}}
@@ -46,7 +46,7 @@ Params:
 {{- end -}}
 
 {{/*
-Auxiliar function to get the right value for enabled redis.
+Auxiliary function to get the right value for enabled redis.
 
 Usage:
 {{ include "common.redis.values.enabled" (dict "context" $) }}
@@ -60,7 +60,7 @@ Usage:
 {{- end -}}
 
 {{/*
-Auxiliar function to get the right prefix path for the values
+Auxiliary function to get the right prefix path for the values
 
 Usage:
 {{ include "common.redis.values.key.prefix" (dict "subchart" "true" "context" $) }}

@@ -14,7 +14,7 @@
 image:
   registry: docker.io
   repository: bitnami/mariadb
-  tag: 10.5.8-debian-10-r0
+  tag: 10.5.8-debian-10-r46
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -87,9 +87,17 @@ auth:
   ## Force users to specify required passwords
   ##
   forcePassword: false
-  ## Mount credentials as a files instead of using an environment variable
+  ## Mount credentials as files instead of using an environment variable
   ##
   usePasswordFiles: false
+  ## Use custom secret files other than chart provided when usePasswordFiles is set to "true"
+  ## Example:
+  ## customPasswordFiles:
+  ##   root: /vault/secrets/mariadb-root
+  ##   user: /vault/secrets/mariadb-user
+  ##   replicator: /vault/secrets/mariadb-replicator
+  ##
+  customPasswordFiles: {}
 
 ## initdb scripts
 ## Specify dictionary of scripts to be run at first boot
@@ -212,6 +220,11 @@ primary:
   ##
   tolerations: []
 
+  ## Priority class for MariaDB primary pods assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+  ##
+  priorityClassName: ""
+
   ## MariaDB primary Pod security context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ##
@@ -301,6 +314,8 @@ primary:
     ## NOTE: When it's set the rest of persistence parameters are ignored
     ##
     # existingClaim:
+    ## Subdirectory of the volume to mount
+    # subPath:
     ## Persistent Volume Storage Class
     ## If defined, storageClassName: <storageClass>
     ## If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -341,7 +356,7 @@ primary:
   ##
   sidecars: []
 
-  ## MariaDB Primary Service paramaters
+  ## MariaDB Primary Service parameters
   ##
   service:
     ## Service type
@@ -377,7 +392,7 @@ primary:
   ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
   ##
   pdb:
-    create: false
+    enabled: false
     ## Min number of pods that must still be available after the eviction
     ##
     minAvailable: 1
@@ -494,6 +509,11 @@ secondary:
   ##
   tolerations: []
 
+  ## Priority class for MariaDB secondary pods assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+  ##
+  priorityClassName: ""
+
   ## MariaDB secondary Pod security context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ##
@@ -579,6 +599,8 @@ secondary:
     ## If true, use a Persistent Volume Claim, If false, use emptyDir
     ##
     enabled: true
+    ## Subdirectory of the volume to mount
+    # subPath:
     ## Persistent Volume Storage Class
     ## If defined, storageClassName: <storageClass>
     ## If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -619,7 +641,7 @@ secondary:
   ##
   sidecars: []
 
-  ## MariaDB Secondary Service paramaters
+  ## MariaDB Secondary Service parameters
   ##
   service:
     ## Service type
@@ -655,7 +677,7 @@ secondary:
   ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
   ##
   pdb:
-    create: false
+    enabled: false
     ## Min number of pods that must still be available after the eviction
     ##
     minAvailable: 1
@@ -704,14 +726,14 @@ volumePermissions:
     #   - myRegistryKeySecretName
   resources: {}
 
-## Mysqld Prometheus exporter paramters
+## Mysqld Prometheus exporter parameters
 ##
 metrics:
   enabled: false
   image:
     registry: docker.io
     repository: bitnami/mysqld-exporter
-    tag: 0.12.1-debian-10-r264
+    tag: 0.12.1-debian-10-r318
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -828,3 +850,7 @@ metrics:
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
     ##
     additionalLabels: {}
+
+## Array with extra yaml to deploy with the chart. Evaluated as a template
+##
+extraDeploy: []

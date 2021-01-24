@@ -18,7 +18,7 @@ Bitnami charts can be used with [Kubeapps](https://kubeapps.com/) for deployment
 ## Prerequisites
 
 - Kubernetes 1.12+
-- Helm 3.0-beta3+
+- Helm 3.1.0
 - PV provisioner support in the underlying infrastructure
 
 ## Installing the Chart
@@ -85,6 +85,7 @@ The following table lists the configurable parameters of the Cassandra chart and
 | `existingConfiguration`       | Pointer to a configMap that contains custom Cassandra configuration files. This will override any Cassandra configuration variable set in the chart  | `nil` (evaluated as a template)                         |
 | `cluster.name`                | Cassandra cluster name                                                                                                                               | `cassandra`                                             |
 | `cluster.seedCount`           | Number of seed nodes (note: must be greater or equal than 1 and less or equal to `replicaCount`)                                                     | `1`                                                     |
+| `cluster.extraSeeds`          | For an external/second cassandra ring. Seed list will be appended by this.                                                                           | `[]`                                                    |
 | `cluster.numTokens`           | Number of tokens for each node                                                                                                                       | `256`                                                   |
 | `cluster.datacenter`          | Datacenter name                                                                                                                                      | `dc1`                                                   |
 | `cluster.rack`                | Rack name                                                                                                                                            | `rack1`                                                 |
@@ -120,6 +121,7 @@ The following table lists the configurable parameters of the Cassandra chart and
 | `affinity`                                | Affinity for pod assignment                                                                                          | `{}` (evaluated as a template)                               |
 | `nodeSelector`                            | Node labels for pod assignment                                                                                       | `{}` (evaluated as a template)                               |
 | `tolerations`                             | Tolerations for pod assignment                                                                                       | `[]` (evaluated as a template)                               |
+| `topologySpreadConstraints`               | Topology Spread Constraints for pod assignment                                                                       | `[]` (evaluated as a template)                               |
 | `podSecurityContext.enabled`              | Enable security context for Cassandra pods                                                                           | `true`                                                       |
 | `podSecurityContext.fsGroup`              | Group ID for the volumes of the pod                                                                                  | `1001`                                                       |
 | `containerSecurityContext.enabled`        | Cassandra Container securityContext                                                                                  | `true`                                                       |
@@ -224,47 +226,6 @@ It is strongly recommended to use immutable tags in a production environment. Th
 
 Bitnami will release a new chart updating its containers if a new version of the main container, significant changes, or critical vulnerabilities exist.
 
-### Production configuration
-
-This chart includes a `values-production.yaml` file where you can find some parameters oriented to production configuration in comparison to the regular `values.yaml`. You can use this file instead of the default one.
-
-- Number of Cassandra and seed nodes:
-
-```diff
-- replicaCount: 1
-- cluster.seedCount: 1
-+ replicaCount: 3
-+ cluster.seedCount: 2
-```
-
-- Minimum nuber of instances that must be available in the cluster:
-
-```diff
-- cluster.minimumAvailable: 1
-+ cluster.minimumAvailable: 2
-```
-
-- Force the user to provide a non-empty password for `dbUser.user`:
-
-```diff
-- dbUser.forcePassword: false
-+ dbUser.forcePassword: true
-```
-
-- Enable NetworkPolicy:
-
-```diff
-- networkPolicy.enabled: false
-+ networkPolicy.enabled: true
-```
-
-- Start a side-car prometheus exporter:
-
-```diff
-- metrics.enabled: false
-+ metrics.enabled: true
-```
-
 ### Enable TLS for Cassandra
 
 You can enable TLS between client and server and between nodes. In order to do so, you need to set the following values:
@@ -304,7 +265,7 @@ If the scripts contain sensitive information, you can use the `initDBSecret` par
 
 ### Setting Pod's affinity
 
-This chart allows you to set your custom affinity using the `affinity` paremeter. Find more infomation about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
+This chart allows you to set your custom affinity using the `affinity` parameter. Find more information about Pod's affinity in the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity).
 
 As an alternative, you can use of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [bitnami/common](https://github.com/bitnami/charts/tree/master/bitnami/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
 
@@ -363,7 +324,7 @@ $ helm upgrade my-release bitnami/cassandra --set dbUser.password=[PASSWORD]
 
 ### To 6.0.0
 
-- Several parameters were renamed or dissapeared in favor of new ones on this major version:
+- Several parameters were renamed or disappeared in favor of new ones on this major version:
   - `securityContext.*` is deprecated in favor of `podSecurityContext` and `containerSecurityContext`.
   - Parameters prefixed with `statefulset.` were renamed removing the prefix. E.g. `statefulset.rollingUpdatePartition` -> renamed to `rollingUpdatePartition`.
   - `cluster.replicaCount` is renamed to `replicaCount`.

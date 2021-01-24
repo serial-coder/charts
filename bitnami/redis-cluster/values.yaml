@@ -9,16 +9,16 @@ global:
   #   storageClass: myStorageClass
   redis: {}
 
-## Bitnami Redis image version
+## Bitnami Redis(TM) image version
 ## ref: https://hub.docker.com/r/bitnami/redis/tags/
 ##
 image:
   registry: docker.io
   repository: bitnami/redis-cluster
-  ## Bitnami Redis image tag
+  ## Bitnami Redis(TM) image tag
   ## ref: https://github.com/bitnami/bitnami-docker-redis#supported-tags-and-respective-dockerfile-links
   ##
-  tag: 6.0.9-debian-10-r13
+  tag: 6.0.10-debian-10-r5
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -31,21 +31,21 @@ image:
   pullSecrets:
   #   - myRegistryKeySecretName
 
-## String to partially override redis.fullname template (will maintain the release name)
+## String to partially override common.names.fullname template (will maintain the release name)
 ##
 nameOverride:
 
-## String to fully override redis.fullname template
+## String to fully override common.names.fullname template
 ##
 fullnameOverride:
 
-## Redis Cluster settings
+## Redis(TM) Cluster settings
 ##
 cluster:
-  ## Enable the creation of a Job that will execute the proper command to create the Redis Cluster.
+  ## Enable the creation of a Job that will execute the proper command to create the Redis(TM) Cluster.
   ##
   init: true
-  ## Number of Redis nodes to be deployed
+  ## Number of Redis(TM) nodes to be deployed
   ##
   nodes: 6
   ## Parameter to be passed as --cluster-replicas to the redis-cli --cluster create
@@ -53,7 +53,7 @@ cluster:
   ##
   replicas: 1
 
-  ## Configuration to access the Redis Cluster from outside the Kubernetes cluster
+  ## Configuration to access the Redis(TM) Cluster from outside the Kubernetes cluster
   ##
   externalAccess:
     enabled: false
@@ -64,17 +64,17 @@ cluster:
       ## Port used when service type is LoadBalancer
       ##
       port: 6379
-      ## Array of load balancer IPs for each Redis node. Length must be the same as cluster.nodes
+      ## Array of load balancer IPs for each Redis(TM) node. Length must be the same as cluster.nodes
       ##
       loadBalancerIP: []
       ## Service annotations done as key:value pairs
       ##
       annotations: {}
 
-  ## This section allows to update the Redis cluster nodes.
+  ## This section allows to update the Redis(TM) cluster nodes.
   ##
   update:
-    ## Setting this to true a hook will add nodes to the Redis cluster after the upgrade.
+    ## Setting this to true a hook will add nodes to the Redis(TM) cluster after the upgrade.
     ## currentNumberOfNodes is required
     ##
     addNodes: false
@@ -101,7 +101,7 @@ redis:
   # ref: https://redis.io/topics/cluster-tutorial#creating-and-using-a-redis-cluster
   useAOFPersistence: "yes"
 
-  # Redis port
+  # Redis(TM) port
   port: 6379
 
   ## lifecycleHooks for the container to automate configuration before or after startup.
@@ -141,7 +141,7 @@ redis:
   ##
   priorityClassName:
 
-  ## Additional Redis configuration for the nodes
+  ## Additional Redis(TM) configuration for the nodes
   ## ref: https://redis.io/topics/config
   ##
   configmap:
@@ -161,12 +161,12 @@ redis:
   ##
   extraEnvVarsSecret:
 
-  ## Redis additional annotations
+  ## Redis(TM) additional annotations
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podAnnotations: {}
 
-  ## Redis resource requests and limits
+  ## Redis(TM) resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   ##
   resources: {}
@@ -179,7 +179,7 @@ redis:
   ##
   schedulerName:
 
-  ## Configure extra options for Redis liveness and readiness probes
+  ## Configure extra options for Redis(TM) liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
   ##
   livenessProbe:
@@ -197,16 +197,55 @@ redis:
     successThreshold: 1
     failureThreshold: 5
 
-  ## Redis Node selectors and tolerations for pod assignment
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature
+  ## Redis(TM) pod affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Allowed values: soft, hard
   ##
-  # nodeSelector: {"beta.kubernetes.io/arch": "amd64"}
-  nodeSelector:
-  tolerations: []
-  ## Redis pod/node affinity/anti-affinity
+  podAffinityPreset: ""
+
+  ## Redis(TM) pod anti-affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Allowed values: soft, hard
+  ##
+  podAntiAffinityPreset: soft
+
+  ## Redis(TM) node affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ## Allowed values: soft, hard
+  ##
+  nodeAffinityPreset:
+    ## Node affinity type
+    ## Allowed values: soft, hard
+    type: ""
+    ## Node label key to match
+    ## E.g.
+    ## key: "kubernetes.io/e2e-az-name"
+    ##
+    key: ""
+    ## Node label values to match
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+
+  ## Affinity for Redis(TM) pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## Note: redis.podAffinityPreset, redis.podAntiAffinityPreset, and redis.nodeAffinityPreset will be ignored when it's set
   ##
   affinity: {}
+
+  ## Node labels for Redis(TM) pods assignment
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Tolerations for Redis(TM) pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+
   ## Pod topology spread constraints
   ## https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
   ## The value is evaluated as a template
@@ -226,11 +265,14 @@ initJob:
   ##
   command:
 
-  ## Container args (using container default if ot set)
+  ## Container args (using container default if not set)
   ##
   args:
 
   ## Job annotations
+  ## IMPORTANT: When using Istio set as the following (https://github.com/istio/istio/issues/11045):
+  ## annotations:
+  ##   sidecar.istio.io/inject: "false"
   ##
   annotations: {}
 
@@ -264,22 +306,65 @@ initJob:
   ## Extra init containers to add to the deployment
   ##
   initContainers: []
-  ## Node labels for pod assignment. Evaluated as a template.
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+
+  ## Init job pod affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Allowed values: soft, hard
+  ##
+  podAffinityPreset: ""
+
+  ## Init job pod anti-affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Allowed values: soft, hard
+  ##
+  podAntiAffinityPreset: soft
+
+  ## Init job node affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ## Allowed values: soft, hard
+  ##
+  nodeAffinityPreset:
+    ## Node affinity type
+    ## Allowed values: soft, hard
+    type: ""
+    ## Node label key to match
+    ## E.g.
+    ## key: "kubernetes.io/e2e-az-name"
+    ##
+    key: ""
+    ## Node label values to match
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+
+  ## Affinity for init job pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## Note: initJob.podAffinityPreset, initJob.podAntiAffinityPreset, and initJob.nodeAffinityPreset will be ignored when it's set
+  ##
+  affinity: {}
+
+  ## Node labels for init job pods assignment
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
   nodeSelector: {}
+
+  ## Tolerations for init job pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+
   ## Pod extra labels
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## Tolerations for pod assignment. Evaluated as a template.
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+
+  ## Priority class name
   ##
-  tolerations: []
-  ## Affinity for pod assignment. Evaluated as a template.
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ##
-  affinity: {}
+  priorityClassName:
+
   ## Container resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   ##
@@ -298,7 +383,7 @@ initJob:
     ##   memory: 256Mi
     ##
 
-## Cluster init job settings
+## Cluster update job settings
 ##
 updateJob:
   ## Number of seconds the Job to create the cluster will be waiting for the Nodes to be ready.
@@ -308,7 +393,7 @@ updateJob:
   ##
   command:
 
-  ## Container args (using container default if ot set)
+  ## Container args (using container default if not set)
   ##
   args:
 
@@ -352,19 +437,59 @@ updateJob:
   ##
   initContainers: []
 
-  ## Node labels for pod assignment. Evaluated as a template.
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ## Update job pod affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Allowed values: soft, hard
   ##
-  nodeSelector:
+  podAffinityPreset: ""
 
-  ## Tolerations for pod assignment. Evaluated as a template.
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ## Update job pod anti-affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Allowed values: soft, hard
+  ##
+  podAntiAffinityPreset: soft
+
+  ## Update job node affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ## Allowed values: soft, hard
+  ##
+  nodeAffinityPreset:
+    ## Node affinity type
+    ## Allowed values: soft, hard
+    type: ""
+    ## Node label key to match
+    ## E.g.
+    ## key: "kubernetes.io/e2e-az-name"
+    ##
+    key: ""
+    ## Node label values to match
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+
+  ## Affinity for update job pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## Note: updateJob.podAffinityPreset, updateJob.podAntiAffinityPreset, and updateJob.nodeAffinityPreset will be ignored when it's set
+  ##
+  affinity: {}
+
+  ## Node labels for update job pods assignment
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Tolerations for update job pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
   tolerations: []
 
-  ## Redis pod/node affinity/anti-affinity
+  ## Priority class name
   ##
-  affinity: {}
+  priorityClassName:
+
   ## Container resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   ##
@@ -389,8 +514,8 @@ networkPolicy:
   enabled: false
 
   ## The Policy model to apply. When set to false, only pods with the correct
-  ## client label will have network access to the port Redis is listening
-  ## on. When true, Redis will accept connections from any source
+  ## client label will have network access to the port Redis(TM) is listening
+  ## on. When true, Redis(TM) will accept connections from any source
   ## (with the correct destination port).
   ##
   allowExternal: true
@@ -427,7 +552,7 @@ rbac:
     #      - gce.unprivileged
     rules: []
 
-## Redis pod Security Context
+## Redis(TM) pod Security Context
 ##
 podSecurityContext:
   enabled: true
@@ -468,7 +593,7 @@ containerSecurityContext:
 ## Use password authentication
 ##
 usePassword: true
-## Redis password
+## Redis(TM) password
 ## Defaults to a random 10-character alphanumeric string if not set and usePassword is true
 ## ref: https://github.com/bitnami/bitnami-docker-redis#setting-the-server-password-on-first-run
 ##
@@ -476,7 +601,7 @@ password: ""
 ## Use existing secret (ignores previous password)
 ##
 existingSecret:
-## Password key to be retrieved from Redis secret
+## Password key to be retrieved from Redis(TM) secret
 ##
 existingSecretPasswordKey:
 
@@ -517,7 +642,7 @@ commonAnnotations:
 ##
 commonLabels:
 
-## Redis Service properties for standalone mode.
+## Redis(TM) Service properties for standalone mode.
 ##
 service:
   port: 6379
@@ -545,14 +670,14 @@ service:
 persistence:
   enabled: true
   ## The path the volume will be mounted at, useful when using different
-  ## Redis images.
+  ## Redis(TM) images.
   ##
   path: /bitnami/redis/data
   ## The subdirectory of the volume to mount to, useful in dev environments
   ## and one PV for multiple services.
   ##
   subPath: ""
-  ## Redis data Persistent Volume Storage Class
+  ## Redis(TM) data Persistent Volume Storage Class
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning
   ## If undefined (the default) or set to null, no storageClassName spec is
@@ -587,7 +712,7 @@ metrics:
   image:
     registry: docker.io
     repository: bitnami/redis-exporter
-    tag: 1.13.1-debian-10-r6
+    tag: 1.15.1-debian-10-r6
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -641,8 +766,8 @@ metrics:
     #    labels:
     #      severity: error
     #    annotations:
-    #      summary: Redis instance {{ "{{ $instance }}" }} down
-    #      description: Redis instance {{ "{{ $instance }}" }} is down.
+    #      summary: Redis(TM) instance {{ "{{ $instance }}" }} down
+    #      description: Redis(TM) instance {{ "{{ $instance }}" }} is down.
     #  - alert: RedisMemoryHigh
     #    expr: >
     #       redis_memory_used_bytes{service="{{ template "common.names.fullname" . }}-metrics"} * 100
@@ -653,16 +778,16 @@ metrics:
     #    labels:
     #      severity: error
     #    annotations:
-    #      summary: Redis instance {{ "{{ $instance }}" }} is using too much memory
-    #      description: Redis instance {{ "{{ $instance }}" }} is using {{ "{{ $value }}" }}% of its available memory.
+    #      summary: Redis(TM) instance {{ "{{ $instance }}" }} is using too much memory
+    #      description: Redis(TM) instance {{ "{{ $instance }}" }} is using {{ "{{ $value }}" }}% of its available memory.
     #  - alert: RedisKeyEviction
     #    expr: increase(redis_evicted_keys_total{service="{{ template "common.names.fullname" . }}-metrics"}[5m]) > 0
     #    for: 1s
     #    labels:
     #      severity: error
     #    annotations:
-    #      summary: Redis instance {{ "{{ $instance }}" }} has evicted keys
-    #      description: Redis instance {{ "{{ $instance }}" }} has evicted {{ "{{ $value }}" }} keys in the last 5 minutes.
+    #      summary: Redis(TM) instance {{ "{{ $instance }}" }} has evicted keys
+    #      description: Redis(TM) instance {{ "{{ $instance }}" }} has evicted {{ "{{ $value }}" }} keys in the last 5 minutes.
 
   ## Metrics exporter pod priorityClassName
   # priorityClassName: {}

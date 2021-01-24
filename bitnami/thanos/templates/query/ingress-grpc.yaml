@@ -3,8 +3,8 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ include "thanos.fullname" . }}-grpc
-  labels: {{- include "thanos.labels" . | nindent 4 }}
+  name: {{ include "common.names.fullname" . }}-grpc
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
   annotations:
     {{- if $query.ingress.grpc.certManager }}
     kubernetes.io/tls-acme: "true"
@@ -18,19 +18,21 @@ spec:
     - host: {{ $query.ingress.grpc.hostname }}
       http:
         paths:
-          - path: /
-            backend:
-              serviceName: {{ template "thanos.fullname" . }}-query
-              servicePort: grpc
+          - path: {{ $query.ingress.path }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" .) }}
+            pathType: {{ $query.ingress.pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (printf "%s-%s" (include "common.names.fullname" .) "query") "servicePort" "grpc" "context" $)  | nindent 14 }}
     {{- end }}
     {{- range $query.ingress.grpc.extraHosts }}
     - host: {{ .name }}
       http:
         paths:
           - path: {{ default "/" .path }}
-            backend:
-              serviceName: {{ template "thanos.fullname" $ }}-query
-              servicePort: grpc
+            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (printf "%s-%s" (include "common.names.fullname" .) "query") "servicePort" "grpc" "context" $) | nindent 14 }}
     {{- end }}
   {{- if or $query.ingress.grpc.tls $query.ingress.grpc.extraTls $query.ingress.grpc.hosts }}
   tls:

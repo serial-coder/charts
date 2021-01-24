@@ -14,7 +14,7 @@
 coreImage:
   registry: docker.io
   repository: bitnami/harbor-core
-  tag: 2.1.1-debian-10-r19
+  tag: 2.1.3-debian-10-r7
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -39,7 +39,7 @@ coreImage:
 portalImage:
   registry: docker.io
   repository: bitnami/harbor-portal
-  tag: 2.1.1-debian-10-r18
+  tag: 2.1.3-debian-10-r8
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -65,7 +65,7 @@ portalImage:
 jobserviceImage:
   registry: docker.io
   repository: bitnami/harbor-jobservice
-  tag: 2.1.1-debian-10-r20
+  tag: 2.1.3-debian-10-r6
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -90,7 +90,7 @@ jobserviceImage:
 chartMuseumImage:
   registry: docker.io
   repository: bitnami/chartmuseum
-  tag: 0.12.0-debian-10-r211
+  tag: 0.12.0-debian-10-r268
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -115,7 +115,7 @@ chartMuseumImage:
 registryImage:
   registry: docker.io
   repository: bitnami/harbor-registry
-  tag: 2.1.1-debian-10-r20
+  tag: 2.1.3-debian-10-r6
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -140,7 +140,7 @@ registryImage:
 registryctlImage:
   registry: docker.io
   repository: bitnami/harbor-registryctl
-  tag: 2.1.1-debian-10-r19
+  tag: 2.1.3-debian-10-r6
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -165,7 +165,7 @@ registryctlImage:
 trivyImage:
   registry: docker.io
   repository: bitnami/harbor-adapter-trivy
-  tag: 2.1.1-debian-10-r20
+  tag: 2.1.3-debian-10-r7
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -190,7 +190,7 @@ trivyImage:
 clairImage:
   registry: docker.io
   repository: bitnami/harbor-clair
-  tag: 2.1.1-debian-10-r20
+  tag: 2.1.3-debian-10-r6
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -216,7 +216,7 @@ clairImage:
 clairAdapterImage:
   registry: docker.io
   repository: bitnami/harbor-adapter-clair
-  tag: 2.1.1-debian-10-r19
+  tag: 2.1.3-debian-10-r6
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -241,7 +241,7 @@ clairAdapterImage:
 notaryServerImage:
   registry: docker.io
   repository: bitnami/harbor-notary-server
-  tag: 2.1.1-debian-10-r19
+  tag: 2.1.3-debian-10-r7
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -266,7 +266,7 @@ notaryServerImage:
 notarySignerImage:
   registry: docker.io
   repository: bitnami/harbor-notary-signer
-  tag: 2.1.1-debian-10-r20
+  tag: 2.1.3-debian-10-r7
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -291,7 +291,7 @@ notarySignerImage:
 nginxImage:
   registry: docker.io
   repository: bitnami/nginx
-  tag: 1.19.4-debian-10-r20
+  tag: 1.19.6-debian-10-r31
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -318,6 +318,10 @@ nameOverride:
 ## String to fully override common.names.fullname template
 ##
 fullnameOverride:
+
+## Force target Kubernetes version (using Helm capabilites if not set)
+##
+kubeVersion:
 
 ## Init containers parameters:
 ## volumePermissions: Change the owner and group of the persistent volume mountpoint to runAsUser:fsGroup values from the securityContext section.
@@ -424,6 +428,15 @@ service:
 ##
 ingress:
   enabled: false
+
+  ## Ingress Path type
+  ##
+  pathType: ImplementationSpecific
+
+  ## Override API Version (automatically detected if not set)
+  ##
+  apiVersion:
+
   ## The list of hostnames to be covered with this ingress record
   ##
   hosts:
@@ -471,7 +484,7 @@ podSecurityContext:
   fsGroup: 1001
 
 ## The persistence is enabled by default and a default StorageClass
-## is needed in the k8s cluster to provision volumes dynamicly.
+## is needed in the k8s cluster to provision volumes dynamically.
 ## Specify another StorageClass in the "storageClass" or set "existingClaim"
 ## if you have already existing persistent volumes to use
 ##
@@ -531,11 +544,11 @@ persistence:
   ## ref: https://github.com/docker/distribution/blob/master/docs/configuration.md#storage
   ##
   imageChartStorage:
-    ## Name of a secret contaning the CA bundle
+    ## Name of a secret containing the CA bundle
     ##
     caBundleSecretName:
     ## Specify whether to disable `redirect` for images and chart storage, for
-    ## backends which not supported it (such as using minio for `s3` storage type), please disable
+    ## backends which not supported it (such as using MinIO(TM) for `s3` storage type), please disable
     ## it. To disable redirects, simply set `disableredirect` to `true` instead.
     ## ref: https://github.com/docker/distribution/blob/master/docs/configuration.md#redirect
     ##
@@ -647,12 +660,13 @@ proxy:
     - core
     - jobservice
     - clair
+    - trivy
 
 nginx:
   ## NGINX container command (using container default if not set)
   ##
   command:
-  ## NGINX container args (using container default if ot set)
+  ## NGINX container args (using container default if not set)
   ##
   args:
   replicas: 1
@@ -742,6 +756,7 @@ nginx:
   nodeAffinityPreset:
     ## Node affinity type
     ## Allowed values: soft, hard
+    ##
     type: ""
     ## Node label key to match
     ## E.g.
@@ -814,7 +829,7 @@ portal:
   ## Harbor portal container command (using container default if not set)
   ##
   command:
-  ## Harbor portal container args (using container default if ot set)
+  ## Harbor portal container args (using container default if not set)
   ##
   args:
 
@@ -919,6 +934,7 @@ portal:
   nodeAffinityPreset:
     ## Node affinity type
     ## Allowed values: soft, hard
+    ##
     type: ""
     ## Node label key to match
     ## E.g.
@@ -983,7 +999,7 @@ core:
   ## Harbor core container command (using container default if not set)
   ##
   command:
-  ## Harbor core container args (using container default if ot set)
+  ## Harbor core container args (using container default if not set)
   ##
   args:
 
@@ -1025,6 +1041,10 @@ core:
   ## Custom Rediness probe
   ##
   customReadinessProbe: {}
+
+  ## Custom Startup probe
+  ##
+  customStartupProbe: {}
 
   ## An array to add extra env vars
   ## For example:
@@ -1096,6 +1116,7 @@ core:
   nodeAffinityPreset:
     ## Node affinity type
     ## Allowed values: soft, hard
+    ##
     type: ""
     ## Node label key to match
     ## E.g.
@@ -1173,6 +1194,13 @@ core:
     timeoutSeconds: 5
     failureThreshold: 6
     successThreshold: 1
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+    successThreshold: 1
 
 ## Harbor Jobservice parameters
 ##
@@ -1180,7 +1208,7 @@ jobservice:
   ## Harbor Jobservice container command (using container default if not set)
   ##
   command:
-  ## Harbor Jobservice container args (using container default if ot set)
+  ## Harbor Jobservice container args (using container default if not set)
   ##
   args:
   replicas: 1
@@ -1289,6 +1317,7 @@ jobservice:
   nodeAffinityPreset:
     ## Node affinity type
     ## Allowed values: soft, hard
+    ##
     type: ""
     ## Node label key to match
     ## E.g.
@@ -1377,7 +1406,7 @@ registry:
     ## Container command (using container default if not set)
     ##
     command:
-    ## Container args (using container default if ot set)
+    ## Container args (using container default if not set)
     ##
     args:
     ## An array to add extra env vars
@@ -1448,7 +1477,7 @@ registry:
     ## Container command (using container default if not set)
     ##
     command:
-    ## Container args (using container default if ot set)
+    ## Container args (using container default if not set)
     ##
     args:
     ## An array to add extra env vars
@@ -1548,6 +1577,7 @@ registry:
   nodeAffinityPreset:
     ## Node affinity type
     ## Allowed values: soft, hard
+    ##
     type: ""
     ## Node label key to match
     ## E.g.
@@ -1626,7 +1656,7 @@ chartmuseum:
   ## Chartmuseum container command (using container default if not set)
   ##
   command:
-  ## Chartmuseum container args (using container default if ot set)
+  ## Chartmuseum container args (using container default if not set)
   ##
   args:
   replicas: 1
@@ -1638,7 +1668,7 @@ chartmuseum:
   updateStrategy:
     type: RollingUpdate
 
-  ## Set the use of the Redis cache.
+  ## Set the use of the Redis(TM) cache.
   ##
   useRedisCache: true
 
@@ -1673,6 +1703,7 @@ chartmuseum:
   provPostFormFieldName:
   maxStorageObjects:
   maxUploadSize:
+  storageTimestampTolerance: "1s"
 
   ## lifecycleHooks for the container to automate configuration before or after startup.
   ##
@@ -1756,6 +1787,7 @@ chartmuseum:
   nodeAffinityPreset:
     ## Node affinity type
     ## Allowed values: soft, hard
+    ##
     type: ""
     ## Node label key to match
     ## E.g.
@@ -1847,13 +1879,13 @@ clair:
   ##
   updatersInterval: 12
 
-  ## Harbor needs Clair adapter to comunicate with Clair API.
+  ## Harbor needs Clair adapter to communicate with Clair API.
   ##
   adapter:
     ## Clair adapter container command (using container default if not set)
     ##
     command:
-    ## Clair adapter container args (using container default if ot set)
+    ## Clair adapter container args (using container default if not set)
     ##
     args:
     ## An array to add extra env vars
@@ -1924,7 +1956,7 @@ clair:
     ## Clair container command (using container default if not set)
     ##
     command:
-    ## Clair container args (using container default if ot set)
+    ## Clair container args (using container default if not set)
     ##
     args:
 
@@ -2027,6 +2059,7 @@ clair:
   nodeAffinityPreset:
     ## Node affinity type
     ## Allowed values: soft, hard
+    ##
     type: ""
     ## Node label key to match
     ## E.g.
@@ -2080,7 +2113,7 @@ trivy:
   ## Harbor Trivy container command (using container default if not set)
   ##
   command:
-  ## Harbor Trivy container args (using container default if ot set)
+  ## Harbor Trivy container args (using container default if not set)
   ##
   args:
 
@@ -2230,6 +2263,7 @@ trivy:
   nodeAffinityPreset:
     ## Node affinity type
     ## Allowed values: soft, hard
+    ##
     type: ""
     ## Node label key to match
     ## E.g.
@@ -2278,7 +2312,7 @@ notary:
     ## Notary server container command (using container default if not set)
     ##
     command:
-    ## Notary server container args (using container default if ot set)
+    ## Notary server container args (using container default if not set)
     ##
     args:
     replicas: 1
@@ -2389,6 +2423,7 @@ notary:
     nodeAffinityPreset:
       ## Node affinity type
       ## Allowed values: soft, hard
+      ##
       type: ""
       ## Node label key to match
       ## E.g.
@@ -2433,7 +2468,7 @@ notary:
     ## Notary signer container command (using container default if not set)
     ##
     command:
-    ## Notary signer container args (using container default if ot set)
+    ## Notary signer container args (using container default if not set)
     ##
     args:
     replicas: 1
@@ -2514,6 +2549,7 @@ notary:
     nodeAffinityPreset:
       ## Node affinity type
       ## Allowed values: soft, hard
+      ##
       type: ""
       ## Node label key to match
       ## E.g.
@@ -2601,7 +2637,7 @@ commonAnnotations: {}
 ##
 commonLabels: {}
 
-## Redis chart configuration
+## Redis(TM) chart configuration
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/redis/values.yaml
 ##
 redis:
@@ -2621,17 +2657,17 @@ redis:
     persistence:
       enabled: true
 
-## If the Redis included in the chart is disabled, Harbor will use below
-## Redis parameters to connect to an external Redis server.
+## If the Redis(TM) included in the chart is disabled, Harbor will use below
+## Redis(TM) parameters to connect to an external Redis(TM) server.
 ##
 externalRedis:
-  ## Redis host
+  ## Redis(TM) host
   ##
   host: localhost
-  ## Redis port number
+  ## Redis(TM) port number
   ##
   port: 6379
-  ## Redis password
+  ## Redis(TM) password
   ##
   password: ''
   coreDatabaseIndex: '0'
@@ -2691,7 +2727,7 @@ externalDatabase:
   port: 5432
   ## External database ssl mode
   ##
-  sslmode:
+  sslmode: disable
   ## External database name for core
   ##
   coreDatabase:

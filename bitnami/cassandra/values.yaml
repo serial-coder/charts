@@ -17,7 +17,7 @@ image:
   ## Bitnami Cassandra image tag
   ## ref: https://github.com/bitnami/bitnami-docker-cassandra#supported-tags-and-respective-dockerfile-links
   ##
-  tag: 3.11.9-debian-10-r0
+  tag: 3.11.9-debian-10-r52
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -179,6 +179,11 @@ cluster:
   ##
   internodeEncryption: none
   clientEncryption: false
+  ## extraSeeds - For an external/second cassandra ring. Seed list will be appended by this.
+  ##
+  # extraSeeds:
+  #   - hostname/IP
+  #   - hostname/IP
 
 ## JVM Settings
 ##
@@ -350,6 +355,12 @@ nodeSelector: {}
 ##
 tolerations: []
 
+## Pod topology spread constraints
+## https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+## The value is evaluated as a template
+##
+topologySpreadConstraints: []
+
 ## Pod security context
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 ##
@@ -417,8 +428,8 @@ networkPolicy:
   enabled: false
 
   ## The Policy model to apply. When set to false, only pods with the correct
-  ## client label will have network access to the port Redis is listening
-  ## on. When true, Redis will accept connections from any source
+  ## client label will have network access to the port Redis(TM) is listening
+  ## on. When true, Redis(TM) will accept connections from any source
   ## (with the correct destination port).
   ##
   # allowExternal: true
@@ -444,7 +455,7 @@ metrics:
     registry: docker.io
     pullPolicy: IfNotPresent
     repository: bitnami/cassandra-exporter
-    tag: 2.3.4-debian-10-r234
+    tag: 2.3.4-debian-10-r287
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/

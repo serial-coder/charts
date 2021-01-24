@@ -142,6 +142,17 @@ Return true if a secret object should be created for MongoDB
 {{- end -}}
 
 {{/*
+Return true if a secret object should be created for MongoDB
+*/}}
+{{- define "mongodb.caSecretName" -}}
+{{- if .Values.tls.existingSecret -}}
+    {{ .Values.tls.existingSecret }}
+{{- else -}}
+    {{ include "mongodb.fullname" . }}-ca
+{{- end -}}
+{{- end -}}
+
+{{/*
 Get the initialization scripts ConfigMap name.
 */}}
 {{- define "mongodb.initdbScriptsCM" -}}
@@ -188,6 +199,7 @@ Compile all warnings into a single message, and call fail.
 */}}
 {{- define "mongodb.validateValues" -}}
 {{- $messages := list -}}
+{{- $messages := append $messages (include "mongodb.validateValues.pspAndRBAC" .) -}}
 {{- $messages := append $messages (include "mongodb.validateValues.architecture" .) -}}
 {{- $messages := append $messages (include "mongodb.validateValues.customDatabase" .) -}}
 {{- $messages := append $messages (include "mongodb.validateValues.externalAccessServiceType" .) -}}
@@ -199,6 +211,15 @@ Compile all warnings into a single message, and call fail.
 
 {{- if $message -}}
 {{-   printf "\nVALUES VALIDATION:\n%s" $message | fail -}}
+{{- end -}}
+{{- end -}}
+
+{{/* Validate RBAC is created when using PSP */}}
+{{- define "mongodb.validateValues.pspAndRBAC" -}}
+{{- if and (.Values.podSecurityPolicy.create) (not .Values.rbac.create) -}}
+mongodb: podSecurityPolicy.create, rbac.create
+    Both podSecurityPolicy.create and rbac.create must be true, if you want
+    to create podSecurityPolicy
 {{- end -}}
 {{- end -}}
 
@@ -231,7 +252,7 @@ Validate values of MongoDB - service type for external access
 {{- define "mongodb.validateValues.externalAccessServiceType" -}}
 {{- if and (eq .Values.architecture "replicaset") (not (eq .Values.externalAccess.service.type "NodePort")) (not (eq .Values.externalAccess.service.type "LoadBalancer")) -}}
 mongodb: externalAccess.service.type
-    Available servive type for external access are NodePort or LoadBalancer.
+    Available service type for external access are NodePort or LoadBalancer.
 {{- end -}}
 {{- end -}}
 
@@ -282,3 +303,25 @@ Validate values of MongoDB exporter URI string - auth.enabled and/or tls.enabled
     {{- printf "mongodb://%slocalhost:27017/admin?%s" $uriAuth $uriTlsArgs -}}
 {{- end -}}
 
+
+{{/*
+Return the appropriate apiGroup for PodSecurityPolicy.
+*/}}
+{{- define "podSecurityPolicy.apiGroup" -}}
+{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+{{- print "policy" -}}
+{{- else -}}
+{{- print "extensions" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the appropriate apiVersion for PodSecurityPolicy.
+*/}}
+{{- define "podSecurityPolicy.apiVersion" -}}
+{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+{{- print "policy/v1beta1" -}}
+{{- else -}}
+{{- print "extensions/v1beta1" -}}
+{{- end -}}
+{{- end -}}
