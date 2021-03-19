@@ -13,7 +13,7 @@
 image:
   registry: docker.io
   repository: bitnami/external-dns
-  tag: 0.7.6-debian-10-r25
+  tag: 0.7.6-debian-10-r53
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -388,6 +388,9 @@ domainFilters: []
 ## Exclude subdomains (optional)
 ##
 excludeDomains: []
+## Filter target zones by zone domain (optional)
+##
+zoneNameFilters: []
 ## Limit possible target zones by zone id (optional)
 ##
 zoneIdFilters: []
@@ -404,7 +407,7 @@ triggerLoopOnEvent: false
 ##
 interval: "1m"
 ## Verbosity of the ExternalDNS logs. Available values are:
-## - panic, debug, info, warn, error, fatal
+## - panic, debug, info, warning, error, fatal, trace
 ##
 logLevel: info
 ## Formats of the ExternalDNS logs. Available values are:
@@ -571,6 +574,9 @@ serviceAccount:
   ## Annotations for the Service Account
   ##
   annotations: {}
+  ## Automount API credentials for a service account.
+  ##
+  automountServiceAccountToken: true
 
 ## RBAC parameteres
 ## https://kubernetes.io/docs/reference/access-authn-authz/rbac/

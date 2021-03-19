@@ -85,7 +85,7 @@ The following tables lists the configurable parameters of the Kafka chart and th
 | `heapOpts`                                | Kafka's Java Heap size                                                                                                                               | `-Xmx1024m -Xms1024m`                                   |
 | `deleteTopicEnable`                       | Switch to enable topic deletion or not                                                                                                               | `false`                                                 |
 | `autoCreateTopicsEnable`                  | Switch to enable auto creation of topics. Enabling auto creation of topics not recommended for production or similar environments                    | `false`                                                 |
-| `logFlushIntervalMessages`                | The number of messages to accept before forcing a flush of data to disk                                                                              | `10000`                                                 |
+| `logFlushIntervalMessages`                | The number of messages to accept before forcing a flush of data to disk                                                                              | `_10000`                                                 |
 | `logFlushIntervalMs`                      | The maximum amount of time a message can sit in a log before we force a flush                                                                        | `1000`                                                  |
 | `logRetentionBytes`                       | A size-based retention policy for logs                                                                                                               | `_1073741824`                                           |
 | `logRetentionCheckIntervalMs`             | The interval at which log segments are checked to see if they can be deleted                                                                         | `300000`                                                |
@@ -135,12 +135,13 @@ The following tables lists the configurable parameters of the Kafka chart and th
 
 ### Kafka provisioning parameters
 
-| Parameter                | Description                      | Default                  |
-|--------------------------|----------------------------------|--------------------------|
-| `provisioning.enabled`   | Enable kafka provisioning Job    | `false`                  |
-| `provisioning.image`     | Kafka provisioning Job image     | `Check values.yaml file` |
-| `provisioning.resources` | Kafka provisioning Job resources | `Check values.yaml file` |
-| `provisioning.topics`    | Kafka provisioning topics        | `[]`                     |
+| Parameter                    | Description                                                           | Default                  |
+|------------------------------|-----------------------------------------------------------------------|--------------------------|
+| `provisioning.enabled`       | Enable kafka provisioning Job                                         | `false`                  |
+| `provisioning.image`         | Kafka provisioning Job image                                          | `Check values.yaml file` |
+| `provisioning.resources`     | Kafka provisioning Job resources                                      | `Check values.yaml file` |
+| `provisioning.topics`        | Kafka provisioning topics                                             | `[]`                     |
+| `provisioning.schedulerName` | Name of the k8s scheduler (other than default) for kafka provisioning | `nil`                    |
 
 ### Statefulset parameters
 
@@ -165,6 +166,7 @@ The following tables lists the configurable parameters of the Kafka chart and th
 | `containerSecurityContext`  | Kafka containers' Security Context                                                        | `{}`                                               |
 | `resources.limits`          | The resources limits for Kafka containers                                                 | `{}`                                               |
 | `resources.requests`        | The requested resources for Kafka containers                                              | `{}`                                               |
+| `schedulerName`             | Name of the k8s scheduler (other than default)                                            | `nil`                                              |
 | `livenessProbe`             | Liveness probe configuration for Kafka                                                    | `Check values.yaml file`                           |
 | `readinessProbe`            | Readiness probe configuration for Kafka                                                   | `Check values.yaml file`                           |
 | `customLivenessProbe`       | Custom Liveness probe configuration for Kafka                                             | `{}`                                               |
@@ -225,11 +227,11 @@ The following tables lists the configurable parameters of the Kafka chart and th
 
 ### RBAC parameters
 
-| Parameter               | Description                                      | Default                                       |
-|-------------------------|--------------------------------------------------|-----------------------------------------------|
-| `serviceAccount.create` | Enable creation of ServiceAccount for Kafka pods | `true`                                        |
-| `serviceAccount.name`   | Name of the created serviceAccount               | Generated using the `kafka.fullname` template |
-| `rbac.create`           | Weather to create & use RBAC resources or not    | `false`                                       |
+| Parameter               | Description                                                                                    | Default                                                 |
+|-------------------------|------------------------------------------------------------------------------------------------|---------------------------------------------------------|
+| `serviceAccount.create` | Enable creation of ServiceAccount for Kafka pods                                               | `true`                                                  |
+| `serviceAccount.name`   | The name of the service account to use. If not set and `create` is `true`, a name is generated | Generated using the `kafka.serviceAccountName` template |
+| `rbac.create`           | Whether to create & use RBAC resources or not                                                  | `false`                                                 |
 
 ### Volume Permissions parameters
 
@@ -237,8 +239,8 @@ The following tables lists the configurable parameters of the Kafka chart and th
 |----------------------------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
 | `volumePermissions.enabled`            | Enable init container that changes the owner and group of the persistent volume(s) mountpoint to `runAsUser:fsGroup` | `false`                                                 |
 | `volumePermissions.image.registry`     | Init container volume-permissions image registry                                                                     | `docker.io`                                             |
-| `volumePermissions.image.repository`   | Init container volume-permissions image name                                                                         | `bitnami/minideb`                                       |
-| `volumePermissions.image.tag`          | Init container volume-permissions image tag                                                                          | `buster`                                                |
+| `volumePermissions.image.repository`   | Init container volume-permissions image name                                                                         | `bitnami/bitnami-shell`                                 |
+| `volumePermissions.image.tag`          | Init container volume-permissions image tag                                                                          | `"10"`                                                  |
 | `volumePermissions.image.pullPolicy`   | Init container volume-permissions image pull policy                                                                  | `Always`                                                |
 | `volumePermissions.image.pullSecrets`  | Specify docker-registry secret names as an array                                                                     | `[]` (does not add image pull secrets to deployed pods) |
 | `volumePermissions.resources.limits`   | Init container volume-permissions resource  limits                                                                   | `{}`                                                    |
@@ -257,12 +259,16 @@ The following tables lists the configurable parameters of the Kafka chart and th
 | `metrics.kafka.image.pullSecrets`      | Specify docker-registry secret names as an array                                                                                 | `[]` (does not add image pull secrets to deployed pods) |
 | `metrics.kafka.extraFlags`             | Extra flags to be passed to Kafka exporter                                                                                       | `{}`                                                    |
 | `metrics.kafka.certificatesSecret`     | Name of the existing secret containing the optional certificate and key files                                                    | `nil`                                                   |
-| `metrics.kafka.tlsCert`     | The secret key from the certificatesSecret if `client-cert` key different from the default                                                   | `cert-file`                                                   |
-| `metrics.kafka.tlsKey`     | The secret key from the certificatesSecret if `client-key` key different from the default                                                    | `key-file`                                                   |
-| `metrics.kafka.tlsCaCert`     | The secret key from the certificatesSecret or tlsCaSecret if 'ca-cert' key different from the default                                                   | `ca-file`                                                   |
-| `metrics.kafka.tlsCaSecret`     | Name of the existing secret containing the ca certificate file, if the ca cert can not be found in `metrics.kafka.certificatesSecret`                                        | `nil`                                                   |
+| `metrics.kafka.tlsCert`                | The secret key from the certificatesSecret if `client-cert` key different from the default                                       | `cert-file`                                             |
+| `metrics.kafka.tlsKey`                 | The secret key from the certificatesSecret if `client-key` key different from the default                                        | `key-file`                                              |
+| `metrics.kafka.tlsCaCert`              | The secret key from the certificatesSecret or tlsCaSecret if 'ca-cert' key different from the default                            | `ca-file`                                               |
+| `metrics.kafka.tlsCaSecret`            | Name of the existing secret containing the ca certificate file, if the ca cert can not be found in `metrics.kafka.certificatesSecret`   | `nil`                                            |
 | `metrics.kafka.resources.limits`       | Kafka Exporter container resource limits                                                                                         | `{}`                                                    |
 | `metrics.kafka.resources.requests`     | Kafka Exporter container resource requests                                                                                       | `{}`                                                    |
+| `metrics.kafka.affinity`               | Affinity for Kafka Exporter pod assignment                                                                                       | `{}`                                                    |
+| `metrics.kafka.nodeSelector`           | Node labels for Kafka Exporter pod assignment                                                                                    | `{}`                                                    |
+| `metrics.kafka.tolerations`            | Tolerations for Kafka Exporter pod assignment                                                                                    | `[]`                                                    |
+| `metrics.kafka.schedulerName`          | Name of the k8s scheduler (other than default) for Kafka Exporter                                                                | `nil`                                                   |
 | `metrics.kafka.service.type`           | Kubernetes service type (`ClusterIP`, `NodePort` or `LoadBalancer`) for Kafka Exporter                                           | `ClusterIP`                                             |
 | `metrics.kafka.service.port`           | Kafka Exporter Prometheus port                                                                                                   | `9308`                                                  |
 | `metrics.kafka.service.nodePort`       | Kubernetes HTTP node port                                                                                                        | `""`                                                    |
@@ -376,8 +382,8 @@ kubectl create secret generic kafka-jks --from-file=./kafka.truststore.jks --fro
 As an alternative to manually create the secret before installing the chart, you can put your JKS files inside the chart folder `files/jks`, an a secret including them will be generated. Please note this alternative requires to have the chart downloaded locally, so you will have to clone this repository or fetch the chart before installing it.
 
 If, for some reason (like using Cert-Manager) you can not use the default JKS secret scheme, you can use the additional parameters:
- - `auth.jksTruststoreSecret` to define additional secret, where the `kafka.truststore.jks` is being kept. The truststore password **must** be the same as in `auth.jksPassword` 
- - `auth.jksTruststore` to overwrite the default value of the truststore key (`kafka.truststore.jks`). 
+ - `auth.jksTruststoreSecret` to define additional secret, where the `kafka.truststore.jks` is being kept. The truststore password **must** be the same as in `auth.jksPassword`
+ - `auth.jksTruststore` to overwrite the default value of the truststore key (`kafka.truststore.jks`).
  - `auth.jksKeystoreSAN` if you want to use a SAN certificate for your brokers. Setting this parameter would mean that the chart expects a existing key in the `auth.jksSecret` with the `auth.jksKeystoreSAN`-value and use this as a keystore for **all** brokers
 > **Note**: The truststore/keystore from above **must** be protected with the same password as in `auth.jksPassword`
 
