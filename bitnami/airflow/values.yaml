@@ -486,6 +486,16 @@ worker:
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
   nodeSelector: {}
+  ## Affinity for worker pod assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## Note: this configuration supersedes the global affinity configuration
+  ##
+  affinity: {}
+  ## Tolerations for worker pod assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ## Note: this configuration supersedes the global tolerations configuration
+  ##
+  tolerations: []
 
 ## Add labels to all the deployed resources
 ##
@@ -602,6 +612,10 @@ git:
     ## Secret with extra environment variables
     ##
     extraEnvVarsSecret:
+    ## Clone init container resource requests and limits
+    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    ##
+    resources: {}
   sync:
     ## Interval in seconds to pull the git repository containing the plugins and/or DAG files
     ##
@@ -624,6 +638,10 @@ git:
     ## Secret with extra environment variables
     ##
     extraEnvVarsSecret:
+    ## Sync sidecar container resource requests and limits
+    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    ##
+    resources: {}
 
 ## LDAP configuration
 ##
@@ -870,9 +888,12 @@ externalDatabase:
   ## Database password
   ##
   password:
-  ## Name of an existing secret resource containing the DB password in a 'postgresql-password' key
+  ## Name of an existing secret resource containing the DB password
   ##
   existingSecret:
+  ## Name of an existing secret key containing the DB password
+  ##
+  existingSecretPasswordKey:
   ## Database name
   ##
   database: bitnami_airflow
